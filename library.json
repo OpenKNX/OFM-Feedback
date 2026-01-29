@@ -1,0 +1,17 @@
+{
+    "name": "OFM-Feedback",
+    "version": "0.1.0",
+    "description": "Haptic or acoustic feedback for OpenKNX devices",
+    "dependencies": {},
+    "homepage": "https://openknx.de",
+    "authors": {
+        "name": "OpenKNX",
+        "email": "info@openknx.de",
+        "url": "https://openknx.de",
+        "maintainer": true
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/OpenKNX/OFM-Feedback"
+    }
+}
