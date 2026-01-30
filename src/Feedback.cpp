@@ -3,64 +3,161 @@
 void Feedback::setup()
 {
 // setup buzzer
-#ifdef BUZZER_PIN
-    logInfoP("Setting: Buzzer available: %d", ParamLOG_BuzzerInstalled);
-    pinMode(BUZZER_PIN, OUTPUT);
+#ifdef OPENKNX_BUZZER_PIN
+    logInfoP("Buzzer available: %d", ParamBUZZ_BuzzerInstalled);
+    if (ParamBUZZ_BuzzerInstalled) {
+        pinMode(OPENKNX_BUZZER_PIN, OUTPUT);
+        KoBUZZ_BuzzerState.valueNoSend(false, DPT_Switch);
+    }
 #endif
-
+// setup vibration
+#ifdef OPENKNX_VIBRATION_PIN
+    logInfoP("Vibration available: %d", ParamBUZZ_VibrationInstalled);
+    if (ParamBUZZ_VibrationInstalled) {
+        pinMode(OPENKNX_VIBRATION_PIN, OUTPUT);
+        KoBUZZ_VibrationState.valueNoSend(false, DPT_Switch);
+    }
+#endif
 }
 
 void Feedback::loop()
 {
+    if (buzzerTimer > 0) 
+    {
+        uint32_t lBuzzerTimeout = buzzerModeExternal ? ParamBUZZ_BuzzerExtTimeMS : ParamBUZZ_BuzzerIntTimeMS;
+        if (delayCheck(buzzerTimer, lBuzzerTimeout)) 
+            setBuzzer(false, buzzerModeExternal);
+    }
 
+    if (vibrationTimer > 0) 
+    {
+        uint32_t lVibrationTimeout = vibrationModeExternal ? ParamBUZZ_VibrationExtTimeMS : ParamBUZZ_VibrationIntTimeMS;
+        if (delayCheck(vibrationTimer, lVibrationTimeout)) 
+            setVibration(false, vibrationModeExternal);
+    }
 }
 
 // on input level, all dpt > 1 values are converted to bool by the according converter
 void Feedback::processInputKo(GroupObject &iKo)
 {
-#ifdef BUZZER_PIN
-    if (iKo.asap() == BUZZ_KoBuzzerLock)
+    switch (iKo.asap())
     {
-        // turn off buzzer in case of lock
-        if (ParamBUZZ_BuzzerLock > 0 && (bool)iKo.value(DPT_Switch) == (ParamBUZZ_BuzzerLock == 1))
-            noTone(BUZZER_PIN);
+        case BUZZ_KoBuzzerLock:
+            // turn off buzzer in case of lock
+            if (ParamBUZZ_BuzzerLock > 0 && (bool)iKo.value(DPT_Switch) == (ParamBUZZ_BuzzerLock == 1))
+                setBuzzer(false, true);
+            break;
+        case BUZZ_KoVibrationLock:
+            // turn off vibration in case of lock
+            if (ParamBUZZ_VibrationLock > 0 && (bool)iKo.value(DPT_Switch) == (ParamBUZZ_VibrationLock == 1))
+                setVibration(false, true);
+            break;
+        case BUZZ_KoBuzzerActive:
+            switch (ParamBUZZ_BuzzerSetup)
+            {
+                case BKO_Switch:
+                    setBuzzer((bool)iKo.value(DPT_Switch), true);
+                    break;
+                case BKO_Volume:
+                    setBuzzer((uint8_t)iKo.value(DPT_DecimalFactor), true);
+                    break;
+                case BKO_Frequency:
+                    setBuzzer((uint16_t)iKo.value(DPT_Value_Frequency), true);
+                    break;
+                default:
+                    // do nothing
+                    break;
+            }
+        case BUZZ_KoVibrationActive:
+            setVibration((bool)iKo.value(DPT_Switch), true);
+            break;
     }
-#endif
+}
+
+void Feedback::setBuzzer(bool iOn, bool iExternal)
+{ 
+    if (iOn)
+        setBuzzer((uint8_t)(iExternal ? ParamBUZZ_BuzzerVolumeExternal : ParamBUZZ_BuzzerVolumeInternal), iExternal);
+    else
+        setBuzzer((uint16_t)0, iExternal);
+}
+
+void Feedback::setBuzzer(uint8_t iVolume, bool iExternal)
+{
+    switch (iVolume)
+    {
+        case BuzzerOff:
+            setBuzzer((uint16_t)0, iExternal);
+            break;
+        case BuzzerSilent:
+            setBuzzer(ParamBUZZ_BuzzerSilent, iExternal);
+            break;
+        case BuzzerNormal:
+            setBuzzer(ParamBUZZ_BuzzerNormal, iExternal);
+            break;
+        case BuzzerLoud:
+            setBuzzer(ParamBUZZ_BuzzerLoud, iExternal);
+            break;
+        default:
+            // do nothing
+            break;
+    }
 }
 
 // turn on/off Buzzer
-void Feedback::setBuzzer()
+void Feedback::setBuzzer(uint16_t iFrequency, bool iExternal)
 {
-#ifdef BUZZER_PIN
-    // check for global lock and alarm
-    if (ParamBUZZ_BuzzerLock == 0 || (bool)KoBUZZ_BuzzerLock.value(DPT_Switch) != (ParamBUZZ_BuzzerLock == 1))
+#ifdef OPENKNX_BUZZER_PIN
+    if (ParamBUZZ_BuzzerInstalled) 
     {
-        switch (ParamBUZZ_BuzzerVolumeExternal)
+        // check for global lock 
+        bool lLock = ParamBUZZ_BuzzerLock > 0 && (bool)KoBUZZ_BuzzerLock.value(DPT_Switch) == (ParamBUZZ_BuzzerLock == 1);
+        // check lock external/internal 
+        lLock = lLock && (ParamBUZZ_BuzzerLockAlsoInternal != iExternal);
+        if (iFrequency == 0)
         {
-            case BuzzerOff:
-                noTone(BUZZER_PIN);
-                break;
-            case BuzzerLoud:
-                tone(BUZZER_PIN, ParamBUZZ_BuzzerLoud);
-                break;
-            case BuzzerSilent:
-                tone(BUZZER_PIN, ParamBUZZ_BuzzerSilent);
-                break;
-            case BuzzerNormal:
-                tone(BUZZER_PIN, ParamBUZZ_BuzzerNormal);
-                break;
-            default:
-                break;
+            noTone(OPENKNX_BUZZER_PIN);
+            KoBUZZ_BuzzerState.value(false, DPT_Switch);
+            buzzerTimer = 0;
+            logDebugP("Buzzer OFF");
+        } 
+        else if (!lLock &&iFrequency >= 1500 && iFrequency <= 6000) 
+        {
+            tone(OPENKNX_BUZZER_PIN, iFrequency);
+            KoBUZZ_BuzzerState.value(true, DPT_Switch);
+            buzzerTimer = delayTimerInit();
+            buzzerModeExternal = iExternal;
+            logDebugP("Buzzer ON: %d Hz (External: %d)", iFrequency, iExternal);
         }
-    }
-    else
-    {
-        // in case of lock we turn off buzzer
-        noTone(BUZZER_PIN);
     }
 #endif
 }
 
+void Feedback::setVibration(bool iOn, bool iExternal)
+{
+#ifdef OPENKNX_VIBRATION_PIN
+    if (ParamBUZZ_VibrationInstalled) 
+    {
+        // check for global lock 
+        bool lLock = ParamBUZZ_VibrationLock > 0 && (bool)KoBUZZ_VibrationLock.value(DPT_Switch) == (ParamBUZZ_VibrationLock == 1);
+        // check lock external/internal 
+        lLock = lLock && (ParamBUZZ_VibrationLockAlsoInternal != iExternal);
+        if (iOn && lLock)
+        {
+            digitalWrite(OPENKNX_VIBRATION_PIN, HIGH);
+            KoBUZZ_VibrationState.value(true, DPT_Switch);
+            vibrationTimer = delayTimerInit();
+            vibrationModeExternal = iExternal;
+            logDebugP("Vibration ON (External: %d)", iExternal);
+        } else {
+            digitalWrite(OPENKNX_VIBRATION_PIN, LOW);
+            KoBUZZ_VibrationState.value(false, DPT_Switch);
+            vibrationTimer = 0;
+            logDebugP("Vibration OFF (External: %d)", iExternal);
+        }
+    }
+#endif
+}
 
 /* Feedback Instance */
 Feedback openknxfeedback;

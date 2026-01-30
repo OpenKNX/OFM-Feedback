@@ -1,6 +1,12 @@
 #pragma once
 #include "OpenKNX.h"
 
+#ifndef OPENKNX_BUZZER_PIN
+  #ifdef BUZZER_PIN
+      #define OPENKNX_BUZZER_PIN BUZZER_PIN 
+  #endif
+#endif
+
 class Feedback : public OpenKNX::Module
 {
   enum BuzzerVolume
@@ -11,6 +17,13 @@ class Feedback : public OpenKNX::Module
       BuzzerLoud   
   };
 
+  enum BuzzerKoType
+  {
+      BKO_Switch,
+      BKO_Volume,
+      BKO_Frequency
+  };
+
   public:
     Feedback() {};
 
@@ -19,8 +32,22 @@ class Feedback : public OpenKNX::Module
     void processInputKo(GroupObject &iKo) override;
     virtual void setup() override;
     virtual void loop() override;
-    void setBuzzer();
-    void setVibration();
+    void setBuzzer(bool iOn) { setBuzzer(iOn, false); };
+    void setVibration(bool iOn) { setVibration(iOn, false); };
+
+  private:
+    void setBuzzer(bool iOn, bool iExternal);
+    void setBuzzer(uint8_t iVolume, bool iExternal);
+    void setBuzzer(uint16_t iFrequency, bool iExternal);
+    void setVibration(bool iOn, bool iExternal);
+    
+    // runtime state for buzzer
+    bool buzzerModeExternal = false; // false=internal, true=external
+    uint32_t buzzerTimer = 0;
+
+    // runtime state for vibration
+    bool vibrationModeExternal = false; // false=internal, true=external
+    uint32_t vibrationTimer = 0;
 };
 
 extern Feedback openknxfeedback;

@@ -4,9 +4,9 @@ Mit diesem Schalter wird angegeben, ob das Gerät einen Buzzer installiert hat. 
 
 Ist ein Buzzer vorhanden, kann man durch weitere Einstellungen die Tonhöhe für leise, normale und laute Töne wählen. Konstruktionsbedingt kann man nicht Tonhöhe und Lautstärke unabhängig einstellen. Jeder Buzzer hat eine Resonanzfrequenz, bei der er am lautesten ist. Weicht man von dieser Resonanzfrequenz ab, wird der Ton leiser. Weiterhin werden tiefere Töne leiser empfunden als hohe. 
 
-Die Standardeinstellungen entsprechen bei:
+Die Standardeinstellungen entsprechen:
 
-* laut der Resonanzfrequenz, meist ein mittelhoher, gut hörbarer Ton
-* normal ist höher als die Resonanzfrequenz, ist somit leiser und höher, aber immer noch gut hörbar
-* leise ist tiefer als die Resonanzfrequenz, wird damit als leise empfungen.
+* bei **laut** der Resonanzfrequenz, meist ein mittelhoher, gut hörbarer Ton
+* **normal** ist höher als die Resonanzfrequenz, ist somit leiser und höher, aber immer noch gut hörbar
+* **leise** ist tiefer als die Resonanzfrequenz, wird damit als leise empfunden.
 
