@@ -142,7 +142,7 @@ void Feedback::setVibration(bool iOn, bool iExternal)
         bool lLock = ParamBUZZ_VibrationLock > 0 && (bool)KoBUZZ_VibrationLock.value(DPT_Switch) == (ParamBUZZ_VibrationLock == 1);
         // check lock external/internal 
         lLock = lLock && (ParamBUZZ_VibrationLockAlsoInternal != iExternal);
-        if (iOn && lLock)
+        if (iOn && !lLock)
         {
             digitalWrite(OPENKNX_VIBRATION_PIN, HIGH);
             KoBUZZ_VibrationState.value(true, DPT_Switch);
