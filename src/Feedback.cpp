@@ -160,4 +160,4 @@ void Feedback::setVibration(bool iOn, bool iExternal)
 }
 
 /* Feedback Instance */
-Feedback openknxfeedback;
+Feedback openknxFeedback;

@@ -50,4 +50,4 @@ class Feedback : public OpenKNX::Module
     uint32_t vibrationTimer = 0;
 };
 
-extern Feedback openknxfeedback;
+extern Feedback openknxFeedback;
