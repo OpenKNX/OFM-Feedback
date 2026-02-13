@@ -32,7 +32,7 @@
                   <Enumeration Text="laut"   Value="3" Id="%ENID%" />
                 </TypeRestriction>
               </ParameterType>
-              <ParameterType Id="%AID%_PT-LockType" Name="LockType">
+              <ParameterType Id="%AID%_PT-BuzzerLockType" Name="BuzzerLockType">
                 <TypeRestriction Base="Value" SizeInBit="2">
                   <Enumeration Text="Keine Sperre"  Value="0" Id="%ENID%" />
                   <Enumeration Text="Gesperrt=1/Freigegeben=0"  Value="1" Id="%ENID%" />
@@ -47,8 +47,8 @@
                 <Parameter Id="%AID%_UP-%TT%00002" Name="VibrationInstalled" ParameterType="%AID%_PT-OnOffYesNo" Offset="0" BitOffset="1" Text="Haptischer Signalgeber vorhanden?&#10;(Vibration)" Value="0" />
                 <Parameter Id="%AID%_UP-%TT%00003" Name="BuzzerSetup" ParameterType="%AID%_PT-BuzzerSetup" Offset="0" BitOffset="2" Text="Buzzer ansteuern über" Value="0" />
                 <Parameter Id="%AID%_UP-%TT%00004" Name="BuzzerVolumeExternal" ParameterType="%AID%_PT-BuzzerVolume" Offset="0" BitOffset="4" Text="Buzzer Lautstärke extern" Value="3" />
-                <Parameter Id="%AID%_UP-%TT%00005" Name="BuzzerLock" ParameterType="%AID%_PT-LockType" Offset="0" BitOffset="6" Text="Buzzer Sperrverhalten" Value="0" />
-                <Parameter Id="%AID%_UP-%TT%00006" Name="VibrationLock" ParameterType="%AID%_PT-LockType" Offset="1" BitOffset="0" Text="Vibration Sperrverhalten" Value="0" />
+                <Parameter Id="%AID%_UP-%TT%00005" Name="BuzzerLock" ParameterType="%AID%_PT-BuzzerLockType" Offset="0" BitOffset="6" Text="Buzzer Sperrverhalten" Value="0" />
+                <Parameter Id="%AID%_UP-%TT%00006" Name="VibrationLock" ParameterType="%AID%_PT-BuzzerLockType" Offset="1" BitOffset="0" Text="Vibration Sperrverhalten" Value="0" />
                 <Parameter Id="%AID%_UP-%TT%00007" Name="VibrationLockAlsoInternal" ParameterType="%AID%_PT-OnOffYesNo" Offset="1" BitOffset="2" Text="Sperre sperrt auch interne Nutzung" Value="0" />
                 <Parameter Id="%AID%_UP-%TT%00008" Name="BuzzerLockAlsoInternal" ParameterType="%AID%_PT-OnOffYesNo" Offset="1" BitOffset="3" Text="Sperre sperrt auch interne Nutzung" Value="0" />
                 <Parameter Id="%AID%_UP-%TT%00009" Name="BuzzerVolumeInternal" ParameterType="%AID%_PT-BuzzerVolume" Offset="1" BitOffset="4" Text="Buzzer Lautstärke intern" Value="3" />
