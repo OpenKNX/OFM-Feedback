@@ -123,6 +123,7 @@
           <Dynamic>
             <Channel Id="%AID%_CH-%PREFIX%" Name="%PREFIX%" Text="%BUZZ_ModuleText%" Number="%PREFIX%" Icon="bell-ring-outline">
               <ParameterBlock Id="%AID%_PB-nnn" Text="Allgemein" Icon="cog-outline" HelpContext="BUZZ-Dokumentation"  ShowInComObjectTree="true">
+                <ParameterRefRef RefId="%AID%_P-%TT%00021_R-%TT%0002101" />
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="%BUZZ_ModuleText%" UIHint="Headline" />
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Version: %ModuleVersion%" />
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
