@@ -127,6 +127,8 @@
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Version: %ModuleVersion%" />
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="" UIHint="HorizontalRuler" />
                 <ParameterSeparator Id="%AID%_PS-nnn" Text="Einstellungen" UIHint="Headline" />
+                <!-- Hidden -->
+                <ParameterRefRef RefId="%AID%_P-%TT%00021_R-%TT%0002101"/>               
                 <!-- Vibration -->
                 <ParameterRefRef RefId="%AID%_UP-%TT%00002_R-%TT%0000201" HelpContext="%DOC%" />
                 <ParameterSeparator Id="%AID%_PS-nnn" Text=" " UIHint="Headline" />
