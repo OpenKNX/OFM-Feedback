@@ -77,7 +77,10 @@ void Feedback::processInputKo(GroupObject &iKo)
 void Feedback::setBuzzer(bool iOn, bool iExternal)
 { 
     if (iOn)
-        setBuzzer((uint8_t)(iExternal ? ParamBUZZ_BuzzerVolumeExternal : ParamBUZZ_BuzzerVolumeInternal), iExternal);
+        if (ParamBUZZ_BuzzerWithFrequency)
+            setBuzzer((uint8_t)(iExternal ? ParamBUZZ_BuzzerVolumeExternal : ParamBUZZ_BuzzerVolumeInternal), iExternal);
+        else
+            setBuzzer((uint8_t)BuzzerNormal, iExternal);
     else
         setBuzzer((uint16_t)0, iExternal);
 }
@@ -93,7 +96,10 @@ void Feedback::setBuzzer(uint8_t iVolume, bool iExternal)
             setBuzzer(ParamBUZZ_BuzzerSilent, iExternal);
             break;
         case BuzzerNormal:
-            setBuzzer(ParamBUZZ_BuzzerNormal, iExternal);
+            if (ParamBUZZ_BuzzerWithFrequency)
+                setBuzzer(ParamBUZZ_BuzzerNormal, iExternal);
+            else
+                setBuzzer((uint16_t)1500, iExternal);
             break;
         case BuzzerLoud:
             setBuzzer(ParamBUZZ_BuzzerLoud, iExternal);
@@ -116,18 +122,29 @@ void Feedback::setBuzzer(uint16_t iFrequency, bool iExternal)
         lLock = lLock && (ParamBUZZ_BuzzerLockAlsoInternal != iExternal);
         if (iFrequency == 0)
         {
-            noTone(OPENKNX_BUZZER_PIN);
+            if (ParamBUZZ_BuzzerWithFrequency)
+                noTone(OPENKNX_BUZZER_PIN);
+            else
+                digitalWrite(OPENKNX_BUZZER_PIN, LOW);
             KoBUZZ_BuzzerState.value(false, DPT_Switch);
             buzzerTimer = 0;
             logDebugP("Buzzer OFF");
         } 
-        else if (!lLock &&iFrequency >= 1500 && iFrequency <= 6000) 
+        else if (!lLock &&iFrequency >= 500 && iFrequency <= 6000) 
         {
-            tone(OPENKNX_BUZZER_PIN, iFrequency);
+            if (ParamBUZZ_BuzzerWithFrequency)
+            {
+                tone(OPENKNX_BUZZER_PIN, iFrequency);
+                logDebugP("Buzzer ON: %d Hz (External: %d)", iFrequency, iExternal);
+            }
+            else
+            {
+                digitalWrite(OPENKNX_BUZZER_PIN, HIGH);
+                logDebugP("Buzzer ON (External: %d)", iExternal);
+            }
             KoBUZZ_BuzzerState.value(true, DPT_Switch);
             buzzerTimer = delayTimerInit();
             buzzerModeExternal = iExternal;
-            logDebugP("Buzzer ON: %d Hz (External: %d)", iFrequency, iExternal);
         }
     }
 #endif

@@ -3,11 +3,15 @@
 <KNX xmlns="http://knx.org/xml/project/20" xmlns:op="http://github.com/OpenKNX/OpenKNXproducer">
 
   <op:config name="%BUZZ_ModuleText%" value="Buzzer / Vibration" />
+  <op:config name="%BUZZ_BuzzerVisible%" value="1" />
+  <op:config name="%BUZZ_VibrationVisible%" value="1" />
+
   <op:config name="%BUZZ_BuzzerInstalled%" value="0" />
   <op:config name="%BUZZ_VibrationInstalled%" value="0" />
   <op:config name="%BUZZ_BuzzerShowInternal%" value="1" />
   <op:config name="%BUZZ_VibrationShowInternal%" value="1" />
 
+  <op:config name="%BUZZ_BuzzerFreqAvailable%" value="1" />
   <op:config name="%BUZZ_BuzzerFreqQuiet%" value="1800" />
   <op:config name="%BUZZ_BuzzerFreqNormal%" value="3200" />
   <op:config name="%BUZZ_BuzzerFreqLoud%" value="2400" />
@@ -60,7 +64,8 @@
                 <Parameter Id="%AID%_UP-%TT%00007" Name="VibrationLockAlsoInternal" ParameterType="%AID%_PT-OnOffYesNo" Offset="1" BitOffset="2" Text="Sperre sperrt auch interne Nutzung" Value="0" />
                 <Parameter Id="%AID%_UP-%TT%00008" Name="BuzzerLockAlsoInternal" ParameterType="%AID%_PT-OnOffYesNo" Offset="1" BitOffset="3" Text="Sperre sperrt auch interne Nutzung" Value="0" />
                 <Parameter Id="%AID%_UP-%TT%00009" Name="BuzzerVolumeInternal" ParameterType="%AID%_PT-BuzzerVolume" Offset="1" BitOffset="4" Text="Buzzer Lautstärke intern" Value="3" />
-                <!-- 2 Bit free -->
+                <Parameter Id="%AID%_UP-%TT%00022" Name="BuzzerWithFrequency" ParameterType="%AID%_PT-OnOffYesNo" Offset="1" BitOffset="6" Text="Buzzer kann verschiedene Töne wiedergeben?" Value="%BUZZ_BuzzerFreqAvailable%" />
+                <!-- 1 Bit free -->
               </Union>
               <Union SizeInBit="112" >
                 <Memory CodeSegment="%MID%" Offset="2" BitOffset="0" />
@@ -100,6 +105,7 @@
               <ParameterRef Id="%AID%_UP-%TT%00019_R-%TT%0001901" RefId="%AID%_UP-%TT%00019" />
               <ParameterRef Id="%AID%_UP-%TT%00020_R-%TT%0002001" RefId="%AID%_UP-%TT%00020" />
               <ParameterRef Id="%AID%_P-%TT%00021_R-%TT%0002101" RefId="%AID%_P-%TT%00021" />
+              <ParameterRef Id="%AID%_UP-%TT%00022_R-%TT%0002201" RefId="%AID%_UP-%TT%00022" />
             </ParameterRefs>
             <ComObjectTable>
               <ComObject Id="%AID%_O-%TT%00001" Name="BuzzerActive"    Text="Buzzer: Aktivieren"    Number="0" FunctionText="Buzzer: Eingang, Frequenz (Aus=0)"    ObjectSize="4 Bytes" DatapointType="DPST-14-33" ReadFlag="Disabled" WriteFlag="Enabled" CommunicationFlag="Enabled" TransmitFlag="Disabled" UpdateFlag="Disabled" ReadOnInitFlag="Disabled" />
@@ -131,33 +137,52 @@
                 <!-- Hidden -->
                 <ParameterRefRef RefId="%AID%_P-%TT%00021_R-%TT%0002101"/>               
                 <!-- Vibration -->
-                <ParameterRefRef RefId="%AID%_UP-%TT%00002_R-%TT%0000201" HelpContext="%DOC%" />
-                <ParameterSeparator Id="%AID%_PS-nnn" Text=" " UIHint="Headline" />
+                <choose ParamRefId="%AID%_P-%TT%00021_R-%TT%0002101">
+                  <when test="%BUZZ_VibrationVisible%">
+                    <ParameterRefRef RefId="%AID%_UP-%TT%00002_R-%TT%0000201" HelpContext="%DOC%" />
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text=" " UIHint="Headline" />
+                  </when>
+                  <when test="!=%BUZZ_VibrationVisible%">
+                    <Assign TargetParamRefRef="%AID%_UP-%TT%00002_R-%TT%0000201" Value="0" />
+                  </when>
+                </choose>
                 <!-- Buzzer -->
-                <ParameterRefRef RefId="%AID%_UP-%TT%00001_R-%TT%0000101" HelpContext="%DOC%" />
+                <choose ParamRefId="%AID%_P-%TT%00021_R-%TT%0002101">
+                  <when test="%BUZZ_BuzzerVisible%">
+                    <ParameterRefRef RefId="%AID%_UP-%TT%00001_R-%TT%0000101" HelpContext="%DOC%" />
+                  </when>
+                  <when test="!=%BUZZ_BuzzerVisible%">
+                    <Assign TargetParamRefRef="%AID%_UP-%TT%00001_R-%TT%0000101" Value="0" />
+                  </when>
+                </choose>
                 <choose ParamRefId="%AID%_UP-%TT%00001_R-%TT%0000101">
                   <when test="1">
-                    <!-- show extra settings for Buzzer-->
-                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Die beim Buzzer verwendeten Frequenzen für leise, normal und laut können hier eingestellt werden" />
-                    <ParameterBlock Id="%AID%_PB-nnn" Inline="true" Layout="Grid" HelpContext="BUZZ-Akustischer-Signalgeber-vorhanden-Buzzer">
-                      <Rows>
-                        <Row Id="%AID%_PB-nnn_R-1" Name="Row1" />
-                        <Row Id="%AID%_PB-nnn_R-2" Name="Row2" />
-                        <Row Id="%AID%_PB-nnn_R-3" Name="Row3" />
-                      </Rows>
-                      <Columns>
-                        <Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="1%" />
-                        <Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="44%" />
-                        <Column Id="%AID%_PB-nnn_C-3" Name="Col3" Width="17%" />
-                      </Columns>
-                      <ParameterSeparator Id="%AID%_PS-nnn" Text=" Frequenz für Buzzer (leise)" Cell="1,2" />
-                      <ParameterRefRef RefId="%AID%_UP-%TT%00010_R-%TT%0001001" HelpContext="%DOC%" Cell="1,3" />
-                      <ParameterSeparator Id="%AID%_PS-nnn" Text=" Frequenz für Buzzer (normal)" Cell="2,2" />
-                      <ParameterRefRef RefId="%AID%_UP-%TT%00011_R-%TT%0001101" HelpContext="%DOC%" Cell="2,3" />
-                      <ParameterSeparator Id="%AID%_PS-nnn" Text=" Frequenz für Buzzer (laut)" Cell="3,2" />
-                      <ParameterRefRef RefId="%AID%_UP-%TT%00012_R-%TT%0001201" HelpContext="%DOC%" Cell="3,3" />
-                    </ParameterBlock>
-                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Der Buzzer kann nur 'AN' oder 'AUS'. Die Lautstärke wird durch eine Frequenz gewählt, die nicht im optimalen Arbeitsbereich liegt. Die Standardwerte meinen also 'leise und tief', 'normal und hoch', 'laut und mittel'." />
+                    <ParameterRefRef RefId="%AID%_UP-%TT%00022_R-%TT%0002201" IndentLevel="1" HelpContext="%DOC%" />
+                    <choose ParamRefId="%AID%_UP-%TT%00022_R-%TT%0002201">
+                      <when test="1">
+                        <!-- show extra settings for Buzzer-->
+                        <ParameterSeparator Id="%AID%_PS-nnn" Text="Die beim Buzzer verwendeten Frequenzen für leise, normal und laut können hier eingestellt werden" />
+                        <ParameterBlock Id="%AID%_PB-nnn" Inline="true" Layout="Grid" HelpContext="BUZZ-Akustischer-Signalgeber-vorhanden-Buzzer">
+                          <Rows>
+                            <Row Id="%AID%_PB-nnn_R-1" Name="Row1" />
+                            <Row Id="%AID%_PB-nnn_R-2" Name="Row2" />
+                            <Row Id="%AID%_PB-nnn_R-3" Name="Row3" />
+                          </Rows>
+                          <Columns>
+                            <Column Id="%AID%_PB-nnn_C-1" Name="Col1" Width="1%" />
+                            <Column Id="%AID%_PB-nnn_C-2" Name="Col2" Width="44%" />
+                            <Column Id="%AID%_PB-nnn_C-3" Name="Col3" Width="17%" />
+                          </Columns>
+                          <ParameterSeparator Id="%AID%_PS-nnn" Text=" Frequenz für Buzzer (leise)" Cell="1,2" />
+                          <ParameterRefRef RefId="%AID%_UP-%TT%00010_R-%TT%0001001" HelpContext="%DOC%" Cell="1,3" />
+                          <ParameterSeparator Id="%AID%_PS-nnn" Text=" Frequenz für Buzzer (normal)" Cell="2,2" />
+                          <ParameterRefRef RefId="%AID%_UP-%TT%00011_R-%TT%0001101" HelpContext="%DOC%" Cell="2,3" />
+                          <ParameterSeparator Id="%AID%_PS-nnn" Text=" Frequenz für Buzzer (laut)" Cell="3,2" />
+                          <ParameterRefRef RefId="%AID%_UP-%TT%00012_R-%TT%0001201" HelpContext="%DOC%" Cell="3,3" />
+                        </ParameterBlock>
+                        <ParameterSeparator Id="%AID%_PS-nnn" Text="Der Buzzer kann nur 'AN' oder 'AUS'. Die Lautstärke wird durch eine Frequenz gewählt, die nicht im optimalen Arbeitsbereich liegt. Die Standardwerte meinen also 'leise und tief', 'normal und hoch', 'laut und mittel'." />
+                      </when>
+                    </choose>
                   </when>
                 </choose>
               </ParameterBlock>
@@ -167,7 +192,7 @@
                     <choose ParamRefId="%AID%_P-%TT%00021_R-%TT%0002101">
                       <when test="%BUZZ_VibrationShowInternal%">
                         <ParameterSeparator Id="%AID%_PS-nnn" Text="Interne Nutzung" UIHint="Headline" />
-                        <ParameterSeparator Id="%AID%_PS-nnn" Text="Für eine haptische Rückmeldung kann die Vibration intern vom Gerät verwendet werden. Im folgenden kann die Dauer der Vibration für angegeben werden." />
+                        <ParameterSeparator Id="%AID%_PS-nnn" Text="Für eine haptische Rückmeldung kann die Vibration intern vom Gerät verwendet werden. Im folgenden kann die Dauer der Vibration angegeben werden." />
                         <!-- Delay pattern: Internal vibration time -->
                         <ParameterBlock Id="%AID%_PB-nnn" Inline="true" Layout="Grid" HelpContext="BUZZ-Vibrationsdauer-intern">
                           <Rows>
@@ -227,9 +252,17 @@
                     <choose ParamRefId="%AID%_P-%TT%00021_R-%TT%0002101">
                       <when test="%BUZZ_BuzzerShowInternal%">
                         <ParameterSeparator Id="%AID%_PS-nnn" Text="Interne Nutzung" UIHint="Headline" />
-                        <ParameterSeparator Id="%AID%_PS-nnn" Text="Für eine akustische Rückmeldung kann der Buzzer intern vom Gerät verwendet werden . Im folgenden kann die Lautstärke und Tondauer angegeben werden." />
-                        <!-- Buzzer: Internal volume -->
-                        <ParameterRefRef RefId="%AID%_UP-%TT%00009_R-%TT%0000901" IndentLevel="1" HelpContext="%DOC%" />
+                        <ParameterSeparator Id="%AID%_PS-nnn" Text="Für eine akustische Rückmeldung kann der Buzzer intern vom Gerät verwendet werden." />
+                        <choose ParamRefId="%AID%_UP-%TT%00022_R-%TT%0002201">
+                          <when test="0">
+                            <ParameterSeparator Id="%AID%_PS-nnn" Text="Im folgenden kann die Tondauer angegeben werden." />
+                          </when>
+                          <when test="1">
+                            <ParameterSeparator Id="%AID%_PS-nnn" Text="Im folgenden kann die Lautstärke und Tondauer angegeben werden." />
+                            <!-- Buzzer: Internal volume -->
+                            <ParameterRefRef RefId="%AID%_UP-%TT%00009_R-%TT%0000901" IndentLevel="1" HelpContext="%DOC%" />
+                          </when>
+                        </choose>
                         <!-- Delay pattern: Internal buzzer time -->
                         <ParameterBlock Id="%AID%_PB-nnn" Inline="true" Layout="Grid" HelpContext="BUZZ-Tondauer-intern">
                           <Rows>
@@ -248,22 +281,31 @@
                       </when>
                     </choose>
                     <ParameterSeparator Id="%AID%_PS-nnn" Text="Externe Nutzung (über KO)" UIHint="Headline" />
-                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Der Buzzer kann auch extern ein- und ausgeschaltet werden. Dafür stehen verschiedene Methoden zur Verfügung." />
-                    <ParameterRefRef RefId="%AID%_UP-%TT%00003_R-%TT%0000301" IndentLevel="1" HelpContext="%DOC%" />
-                    <choose ParamRefId="%AID%_UP-%TT%00003_R-%TT%0000301">
+                    <ParameterSeparator Id="%AID%_PS-nnn" Text="Der Buzzer kann auch extern ein- und ausgeschaltet werden." />
+                    <choose ParamRefId="%AID%_UP-%TT%00022_R-%TT%0002201">
                       <when test="0">
                         <!-- on/of signal -->
                         <ComObjectRefRef RefId="%AID%_O-%TT%00001_R-%TT%0000103" />
-                        <!-- external volume -->
-                        <ParameterRefRef RefId="%AID%_UP-%TT%00004_R-%TT%0000401" IndentLevel="1" HelpContext="%DOC%" />
                       </when>
                       <when test="1">
-                        <!-- volume signal -->
-                        <ComObjectRefRef RefId="%AID%_O-%TT%00001_R-%TT%0000102" />
-                      </when>
-                      <when test="2">
-                        <!-- frequency signal -->
-                        <ComObjectRefRef RefId="%AID%_O-%TT%00001_R-%TT%0000101" />
+                        <ParameterSeparator Id="%AID%_PS-nnn" Text="Dafür stehen verschiedene Methoden zur Verfügung." />
+                        <ParameterRefRef RefId="%AID%_UP-%TT%00003_R-%TT%0000301" IndentLevel="1" HelpContext="%DOC%" />
+                        <choose ParamRefId="%AID%_UP-%TT%00003_R-%TT%0000301">
+                          <when test="0">
+                            <!-- on/of signal -->
+                            <ComObjectRefRef RefId="%AID%_O-%TT%00001_R-%TT%0000103" />
+                            <!-- external volume -->
+                            <ParameterRefRef RefId="%AID%_UP-%TT%00004_R-%TT%0000401" IndentLevel="1" HelpContext="%DOC%" />
+                          </when>
+                          <when test="1">
+                            <!-- volume signal -->
+                            <ComObjectRefRef RefId="%AID%_O-%TT%00001_R-%TT%0000102" />
+                          </when>
+                          <when test="2">
+                            <!-- frequency signal -->
+                            <ComObjectRefRef RefId="%AID%_O-%TT%00001_R-%TT%0000101" />
+                          </when>
+                        </choose>
                       </when>
                     </choose>
                     <ComObjectRefRef RefId="%AID%_O-%TT%00002_R-%TT%0000201" />

@@ -56,7 +56,12 @@ Mit diesem Schalter wird angegeben, ob das Gerät einen Vibrationsmotor installi
 
 Mit diesem Schalter wird angegeben, ob das Gerät einen Buzzer installiert hat. Falls nicht, sollte hier **Nein** gewählt werden, da es sonst zu unerwartetem Verhalten beim Gerät kommen kann.
 
-Ist ein Buzzer vorhanden, kann man durch weitere Einstellungen die Tonhöhe für leise, normale und laute Töne wählen. Konstruktionsbedingt kann man nicht Tonhöhe und Lautstärke unabhängig einstellen. Jeder Buzzer hat eine Resonanzfrequenz, bei der er am lautesten ist. Weicht man von dieser Resonanzfrequenz ab, wird der Ton leiser. Weiterhin werden tiefere Töne leiser empfunden als hohe. 
+<!-- DOC -->
+#### **Buzzer kann verschiedene Töne wiedergeben**
+
+Es gibt Geräte mit einem Buzzer, der unterschiedliche Töne oder der nur einen bestimmten Ton wiedergeben kann. Ist ein Buzzer installiert, der mehrere Töne wiedergeben kann, muss hier ein Ja gewählt werden.
+
+Ist ein Buzzer für mehrere Töne vorhanden, kann man durch weitere Einstellungen die Tonhöhe für leise, normale und laute Töne wählen. Konstruktionsbedingt kann man nicht Tonhöhe und Lautstärke unabhängig einstellen. Jeder Buzzer hat eine Resonanzfrequenz, bei der er am lautesten ist. Weicht man von dieser Resonanzfrequenz ab, wird der Ton leiser. Weiterhin werden tiefere Töne leiser empfunden als hohe. 
 
 Die Standardeinstellungen entsprechen:
 
@@ -68,7 +73,7 @@ Die Standardeinstellungen entsprechen:
 #### **Frequenz für Buzzer (leise)**
 
 <!-- DOC Skip="1" -->
-Erscheint nur, wenn bei "Akustischer Signalgeber vorhanden?" ein Ja angegeben wurde.
+Erscheint nur, wenn bei "Buzzer kann unterschiedliche Töne wiedergeben" ein Ja angegeben wurde.
 
 Hier kann man die Frequenz (Höhe) des Tons wählen, der bei weiteren Einstellungen als "leiser Ton" wiedergegeben werden soll. 
 
@@ -76,7 +81,7 @@ Hier kann man die Frequenz (Höhe) des Tons wählen, der bei weiteren Einstellun
 #### **Frequenz für Buzzer (normal)**
 
 <!-- DOC Skip="1" -->
-Erscheint nur, wenn bei "Akustischer Signalgeber vorhanden?" ein Ja angegeben wurde.
+Erscheint nur, wenn bei "Buzzer kann unterschiedliche Töne wiedergeben" ein Ja angegeben wurde.
 
 Hier kann man die Frequenz (Höhe) des Tons wählen, der bei weiteren Einstellungen als "normaler Ton" wiedergegeben werden soll. 
 
@@ -84,7 +89,7 @@ Hier kann man die Frequenz (Höhe) des Tons wählen, der bei weiteren Einstellun
 #### **Frequenz für Buzzer (laut)**
 
 <!-- DOC Skip="1" -->
-Erscheint nur, wenn bei "Akustischer Signalgeber vorhanden?" ein Ja angegeben wurde.
+Erscheint nur, wenn bei "Buzzer kann unterschiedliche Töne wiedergeben" ein Ja angegeben wurde.
 
 Hier kann man die Frequenz (Höhe) des Tons wählen, der bei weiteren Einstellungen als "lauter Ton" wiedergegeben werden soll. 
 
