@@ -36,18 +36,20 @@ class Feedback : public OpenKNX::Module
     void setVibration(bool iOn) { setVibration(iOn, false); };
 
   private:
-    void setBuzzer(bool iOn, bool iExternal);
-    void setBuzzer(uint8_t iVolume, bool iExternal);
-    void setBuzzer(uint16_t iFrequency, bool iExternal);
-    void setVibration(bool iOn, bool iExternal);
+    void setBuzzer(bool iOn, bool iExternal, uint32_t iDuration = 0);
+    void setBuzzer(uint8_t iVolume, bool iExternal, uint32_t iDuration = 0);
+    void setBuzzer(uint16_t iFrequency, bool iExternal, uint32_t iDuration = 0);
+    void setVibration(bool iOn, bool iExternal, uint32_t iDuration = 0);
     
     // runtime state for buzzer
     bool buzzerModeExternal = false; // false=internal, true=external
     uint32_t buzzerTimer = 0;
+    uint32_t buzzerDuration = 0;
 
     // runtime state for vibration
     bool vibrationModeExternal = false; // false=internal, true=external
     uint32_t vibrationTimer = 0;
+    uint32_t vibrationDuration = 0;
 };
 
 extern Feedback openknxFeedback;
