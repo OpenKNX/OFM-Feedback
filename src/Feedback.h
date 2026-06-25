@@ -34,13 +34,12 @@ class Feedback : public OpenKNX::Module
     virtual void loop() override;
     void setBuzzer(bool iOn) { setBuzzer(iOn, false); };
     void setVibration(bool iOn) { setVibration(iOn, false); };
-
-  private:
     void setBuzzer(bool iOn, bool iExternal, uint32_t iDuration = 0);
     void setBuzzer(uint8_t iVolume, bool iExternal, uint32_t iDuration = 0);
     void setBuzzer(uint16_t iFrequency, bool iExternal, uint32_t iDuration = 0);
     void setVibration(bool iOn, bool iExternal, uint32_t iDuration = 0);
-    
+
+  private:    
     // runtime state for buzzer
     bool buzzerModeExternal = false; // false=internal, true=external
     uint32_t buzzerTimer = 0;
