@@ -1,5 +1,36 @@
 #include "Feedback.h"
 
+void Feedback::showHelp()
+{
+    if (!knx.configured())
+        return;
+
+    openknx.console.printHelpLine("buzz", "Buzzer commands");
+}
+
+bool Feedback::processCommand(const std::string iCmd, bool iDebugKo)
+{
+    if (!knx.configured())
+        return false;
+
+    if (iCmd.substr(0, 4) != "buzz")
+        return false;
+
+    if (iCmd == "buzz")
+    {
+        openknx.console.printHelpLine("buzz play", "Play a test tone sequence");
+        return true;
+    }
+
+    if (iCmd == "buzz play")
+    {
+        setBuzzer({{1800, 300, 300}, {3200, 500, 500}, {2400, 100, 0}});
+        return true;
+    }
+
+    return false;
+}
+
 void Feedback::setup()
 {
 // setup buzzer
@@ -22,13 +53,36 @@ void Feedback::setup()
 
 void Feedback::loop()
 {
-    if (buzzerTimer > 0) 
+    if (buzzerTimer > 0)
     {
         uint32_t lBuzzerTimeout = buzzerModeExternal ? ParamBUZZ_BuzzerExtTimeMS : ParamBUZZ_BuzzerIntTimeMS;
         if (buzzerDuration > 0)
             lBuzzerTimeout = buzzerDuration;
-        if (delayCheck(buzzerTimer, lBuzzerTimeout)) 
-            setBuzzer(false, buzzerModeExternal);
+        if (delayCheck(buzzerTimer, lBuzzerTimeout))
+            _buzzerHwApply(0, buzzerModeExternal, 0);
+    }
+
+    if (_buzzerSequence[_buzzerSeqIndex].frequency != 0 || _buzzerInPause)
+    {
+        if (!_buzzerInPause && buzzerTimer == 0)
+        {
+            uint32_t pause = _buzzerSequence[_buzzerSeqIndex].pauseDuration;
+            _buzzerSeqIndex++;
+            if (pause > 0)
+            {
+                _buzzerInPause = true;
+                _buzzerSeqTimer = delayTimerInit();
+            }
+            else
+            {
+                _buzzerSeqStep();
+            }
+        }
+        else if (_buzzerInPause && delayCheck(_buzzerSeqTimer, _buzzerSequence[_buzzerSeqIndex - 1].pauseDuration))
+        {
+            _buzzerInPause = false;
+            _buzzerSeqStep();
+        }
     }
 
     if (vibrationTimer > 0) 
@@ -72,6 +126,7 @@ void Feedback::processInputKo(GroupObject &iKo)
                     // do nothing
                     break;
             }
+            break;
         case BUZZ_KoVibrationActive:
             setVibration((bool)iKo.value(DPT_Switch), true);
             break;
@@ -114,8 +169,54 @@ void Feedback::setBuzzer(uint8_t iVolume, bool iExternal, uint32_t iDuration)
     }
 }
 
-// turn on/off Buzzer
+void Feedback::setBuzzer(const BuzzerTone* iTones, bool iExternal)
+{
+    uint8_t i = 0;
+    while (i < BUZZER_SEQUENCE_MAX && iTones[i].frequency != 0)
+        i++;
+    setBuzzer(iTones, iTones + i, iExternal);
+}
+
+void Feedback::setBuzzer(const BuzzerTone* iBegin, const BuzzerTone* iEnd, bool iExternal)
+{
+    _buzzerSeqIndex = 0;
+    _buzzerInPause = false;
+    _buzzerSeqTimer = 0;
+
+    uint8_t i = 0;
+    while (i < BUZZER_SEQUENCE_MAX && iBegin + i < iEnd)
+    {
+        _buzzerSequence[i] = iBegin[i];
+        i++;
+    }
+    _buzzerSequence[i] = {0, 0, 0};
+
+    buzzerModeExternal = iExternal;
+    _buzzerSeqStep();
+}
+
+void Feedback::_buzzerSeqStep()
+{
+    const BuzzerTone& tone = _buzzerSequence[_buzzerSeqIndex];
+    if (tone.frequency == 0)
+    {
+        _buzzerHwApply(0, buzzerModeExternal, 0);
+        return;
+    }
+    _buzzerHwApply(tone.frequency, buzzerModeExternal, tone.playDuration);
+}
+
+// turn on/off Buzzer — resets any running sequence
 void Feedback::setBuzzer(uint16_t iFrequency, bool iExternal, uint32_t iDuration)
+{
+    _buzzerSeqIndex = 0;
+    _buzzerInPause = false;
+    _buzzerSeqTimer = 0;
+    _buzzerSequence[0] = {0, 0, 0};
+    _buzzerHwApply(iFrequency, iExternal, iDuration);
+}
+
+void Feedback::_buzzerHwApply(uint16_t iFrequency, bool iExternal, uint32_t iDuration)
 {
 #ifdef OPENKNX_BUZZER_PIN
     if (ParamBUZZ_BuzzerInstalled) 
@@ -123,7 +224,7 @@ void Feedback::setBuzzer(uint16_t iFrequency, bool iExternal, uint32_t iDuration
         // check for global lock 
         bool lLock = ParamBUZZ_BuzzerLock > 0 && (bool)KoBUZZ_BuzzerLock.value(DPT_Switch) == (ParamBUZZ_BuzzerLock == 1);
         // check lock external/internal 
-        lLock = lLock && (ParamBUZZ_BuzzerLockAlsoInternal != iExternal);
+        lLock = lLock && (iExternal || ParamBUZZ_BuzzerLockAlsoInternal);
         if (iFrequency == 0)
         {
             if (ParamBUZZ_BuzzerWithFrequency)
@@ -164,7 +265,7 @@ void Feedback::setVibration(bool iOn, bool iExternal, uint32_t iDuration)
         // check for global lock 
         bool lLock = ParamBUZZ_VibrationLock > 0 && (bool)KoBUZZ_VibrationLock.value(DPT_Switch) == (ParamBUZZ_VibrationLock == 1);
         // check lock external/internal 
-        lLock = lLock && (ParamBUZZ_VibrationLockAlsoInternal != iExternal);
+        lLock = lLock && (iExternal || ParamBUZZ_VibrationLockAlsoInternal);
         if (iOn && !lLock)
         {
             digitalWrite(OPENKNX_VIBRATION_PIN, HIGH);
