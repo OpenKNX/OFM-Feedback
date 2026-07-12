@@ -19,12 +19,20 @@ bool Feedback::processCommand(const std::string iCmd, bool iDebugKo)
     if (iCmd == "buzz")
     {
         openknx.console.printHelpLine("buzz play", "Play a test tone sequence");
+        openknx.console.printHelpLine("buzz freq <frequency>", "Play a test tone with given frequency (Hz)");
         return true;
     }
 
     if (iCmd == "buzz play")
     {
         setBuzzer({{1800, 300, 300}, {3200, 500, 500}, {2400, 100, 0}});
+        return true;
+    }
+
+    if (iCmd.substr(0, 10) == "buzz freq ")
+    {
+        uint16_t lFreq = (uint16_t)std::stoi(iCmd.substr(10));
+        setBuzzer(lFreq, false, 1000);
         return true;
     }
 
